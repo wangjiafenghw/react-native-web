@@ -283,7 +283,7 @@ const TextInput = forwardRef<TextInputProps, *>((props, forwardedRef) => {
       }
     }
 
-    if (!e.isDefaultPrevented() && e.key === 'Enter' && !e.shiftKey) {
+    if (!e.isDefaultPrevented() && e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       if ((blurOnSubmit || !multiline) && onSubmitEditing) {
         // prevent "Enter" from inserting a newline
         e.preventDefault();
