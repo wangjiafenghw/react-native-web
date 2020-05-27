@@ -10,8 +10,6 @@
 
 'use strict';
 
-import invariant from 'fbjs/lib/invariant';
-
 type ClickEvent = any;
 type KeyboardEvent = any;
 type ResponderEvent = any;
@@ -414,14 +412,13 @@ export default class PressResponder {
     if (this._responderID == null && signal === RESPONDER_RELEASE) {
       return;
     }
-    invariant(
-      nextState != null && nextState !== ERROR,
-      'PressResponder: Invalid signal `%s` for state `%s` on responder: %s',
-      signal,
-      prevState,
-      this._responderID
-    );
-    if (prevState !== nextState) {
+    if (nextState == null || nextState === ERROR) {
+      console.error(
+        `PressResponder: Invalid signal ${signal} for state ${prevState} on responder`,
+        this._responderID,
+        event
+      );
+    } else if (prevState !== nextState) {
       this._performTransitionSideEffects(prevState, nextState, signal, event);
       this._touchState = nextState;
     }
