@@ -1,316 +1,310 @@
-/**
- * Copyright (c) Nicolas Gallagher.
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @noflow
- */
+import * as React from 'react';
+import ReactDOM from 'react-dom';
+import BetterScroll from 'better-scroll';
+import { View, StyleSheet, RefreshControl } from 'react-native';
 
-import type { ViewProps, ViewStyle } from '../View/types';
-
-import createReactClass from 'create-react-class';
-import dismissKeyboard from '../../modules/dismissKeyboard';
-import invariant from 'fbjs/lib/invariant';
-import ScrollResponder from '../../modules/ScrollResponder';
-import ScrollViewBase from './ScrollViewBase';
-import StyleSheet from '../StyleSheet';
-import View from '../View';
-import React from 'react';
-
-type ScrollViewProps = {
-  ...ViewProps,
-  contentContainerStyle?: ViewStyle,
-  horizontal?: boolean,
-  keyboardDismissMode?: 'none' | 'interactive' | 'on-drag',
-  onContentSizeChange?: (e: any) => void,
-  onScroll?: (e: any) => void,
-  pagingEnabled?: boolean,
-  refreshControl?: any,
-  scrollEnabled?: boolean,
-  scrollEventThrottle?: number,
-  stickyHeaderIndices?: Array<number>
-};
-
-const emptyObject = {};
-
-/* eslint-disable react/prefer-es6-class */
-const ScrollView = ((createReactClass({
-  mixins: [ScrollResponder.Mixin],
-
-  getInitialState() {
-    return this.scrollResponderMixinGetInitialState();
+const TRUE = true,
+  FALSE = false,
+  NativeEvent = {
+    contentOffset: {},
+    contentSize: {},
+    layoutMeasurement: {}
   },
+  DEFAULT_ON_EndReachedThreshold = 0.01,
+  DEFAULT_ANIMATED_TIME = 300; // ms
 
-  flashScrollIndicators() {
-    this.scrollResponderFlashScrollIndicators();
-  },
-
-  setNativeProps(props: Object) {
-    if (this._scrollNodeRef) {
-      this._scrollNodeRef.setNativeProps(props);
-    }
-  },
+export default class extends React.Component {
+  constructor(props) {
+    super(props);
+    this.bs = null;
+    this.bsOptions = this.transPropsToBSAttr(props);
+    this.contentSize = { height: 0, width: 0 };
+    this._cachePosition = { x: 0, y: 0 }; // 缓存滚动数据
+    this.canLoadMore = true;
+    this.onEndReachedThreshold = props.onEndReachedThreshold || DEFAULT_ON_EndReachedThreshold;
+  }
 
   /**
-   * Returns a reference to the underlying scroll responder, which supports
-   * operations like `scrollTo`. All ScrollView-like components should
-   * implement this method so that they can be composed while providing access
-   * to the underlying scroll responder's methods.
+   * 将组件属性通过一定转换规则赋予bs容器属性
+   * @param {*} props 组件属性
    */
-  getScrollResponder(): ScrollView {
-    return this;
-  },
-
-  getScrollableNode(): any {
-    return this._scrollNodeRef;
-  },
-
-  getInnerViewNode(): any {
-    return this._innerViewRef;
-  },
-
-  /**
-   * Scrolls to a given x, y offset, either immediately or with a smooth animation.
-   * Syntax:
-   *
-   * scrollTo(options: {x: number = 0; y: number = 0; animated: boolean = true})
-   *
-   * Note: The weird argument signature is due to the fact that, for historical reasons,
-   * the function also accepts separate arguments as as alternative to the options object.
-   * This is deprecated due to ambiguity (y before x), and SHOULD NOT BE USED.
-   */
-  scrollTo(
-    y?: number | { x?: number, y?: number, animated?: boolean },
-    x?: number,
-    animated?: boolean
-  ) {
-    if (typeof y === 'number') {
-      console.warn(
-        '`scrollTo(y, x, animated)` is deprecated. Use `scrollTo({x: 5, y: 5, animated: true})` instead.'
-      );
-    } else {
-      ({ x, y, animated } = y || emptyObject);
-    }
-
-    this.getScrollResponder().scrollResponderScrollTo({
-      x: x || 0,
-      y: y || 0,
-      animated: animated !== false
-    });
-  },
-
-  /**
-   * If this is a vertical ScrollView scrolls to the bottom.
-   * If this is a horizontal ScrollView scrolls to the right.
-   *
-   * Use `scrollToEnd({ animated: true })` for smooth animated scrolling,
-   * `scrollToEnd({ animated: false })` for immediate scrolling.
-   * If no options are passed, `animated` defaults to true.
-   */
-  scrollToEnd(options?: { animated?: boolean }) {
-    // Default to true
-    const animated = (options && options.animated) !== false;
-    const { horizontal } = this.props;
-    const scrollResponder = this.getScrollResponder();
-    const scrollResponderNode = scrollResponder.scrollResponderGetScrollableNode();
-    const x = horizontal ? scrollResponderNode.scrollWidth : 0;
-    const y = horizontal ? 0 : scrollResponderNode.scrollHeight;
-    scrollResponder.scrollResponderScrollTo({ x, y, animated });
-  },
-
-  render() {
-    const {
-      contentContainerStyle,
-      horizontal,
-      onContentSizeChange,
-      refreshControl,
-      stickyHeaderIndices,
-      pagingEnabled,
-      /* eslint-disable */
-      keyboardDismissMode,
-      onScroll,
-      /* eslint-enable */
-      ...other
-    } = this.props;
-
-    if (process.env.NODE_ENV !== 'production' && this.props.style) {
-      const style = StyleSheet.flatten(this.props.style);
-      const childLayoutProps = ['alignItems', 'justifyContent'].filter(
-        prop => style && style[prop] !== undefined
-      );
-      invariant(
-        childLayoutProps.length === 0,
-        `ScrollView child layout (${JSON.stringify(childLayoutProps)}) ` +
-          'must be applied through the contentContainerStyle prop.'
-      );
-    }
-
-    let contentSizeChangeProps = {};
-    if (onContentSizeChange) {
-      contentSizeChangeProps = {
-        onLayout: this._handleContentOnLayout
-      };
-    }
-
-    const hasStickyHeaderIndices = !horizontal && Array.isArray(stickyHeaderIndices);
-    const children =
-      hasStickyHeaderIndices || pagingEnabled
-        ? React.Children.map(this.props.children, (child, i) => {
-            const isSticky = hasStickyHeaderIndices && stickyHeaderIndices.indexOf(i) > -1;
-            if (child != null && (isSticky || pagingEnabled)) {
-              return (
-                <View
-                  style={StyleSheet.compose(
-                    isSticky && styles.stickyHeader,
-                    pagingEnabled && styles.pagingEnabledChild
-                  )}
-                >
-                  {child}
-                </View>
-              );
-            } else {
-              return child;
-            }
-          })
-        : this.props.children;
-
-    const contentContainer = (
-      <View
-        {...contentSizeChangeProps}
-        children={children}
-        collapsable={false}
-        ref={this._setInnerViewRef}
-        style={StyleSheet.compose(
-          horizontal && styles.contentContainerHorizontal,
-          contentContainerStyle
-        )}
-      />
-    );
-
-    const baseStyle = horizontal ? styles.baseHorizontal : styles.baseVertical;
-    const pagingEnabledStyle = horizontal
-      ? styles.pagingEnabledHorizontal
-      : styles.pagingEnabledVertical;
-
-    const props = {
-      ...other,
-      style: [baseStyle, pagingEnabled && pagingEnabledStyle, this.props.style],
-      onTouchStart: this.scrollResponderHandleTouchStart,
-      onTouchMove: this.scrollResponderHandleTouchMove,
-      onTouchEnd: this.scrollResponderHandleTouchEnd,
-      onScrollBeginDrag: this.scrollResponderHandleScrollBeginDrag,
-      onScrollEndDrag: this.scrollResponderHandleScrollEndDrag,
-      onMomentumScrollBegin: this.scrollResponderHandleMomentumScrollBegin,
-      onMomentumScrollEnd: this.scrollResponderHandleMomentumScrollEnd,
-      onStartShouldSetResponder: this.scrollResponderHandleStartShouldSetResponder,
-      onStartShouldSetResponderCapture: this.scrollResponderHandleStartShouldSetResponderCapture,
-      onScrollShouldSetResponder: this.scrollResponderHandleScrollShouldSetResponder,
-      onScroll: this._handleScroll,
-      onResponderGrant: this.scrollResponderHandleResponderGrant,
-      onResponderTerminationRequest: this.scrollResponderHandleTerminationRequest,
-      onResponderTerminate: this.scrollResponderHandleTerminate,
-      onResponderRelease: this.scrollResponderHandleResponderRelease,
-      onResponderReject: this.scrollResponderHandleResponderReject
+  transPropsToBSAttr = props => {
+    return {
+      scrollY: !props.horizontal,
+      scrollX: props.horizontal,
+      scrollbar:
+        (props.horizontal && props.showsHorizontalScrollIndicator) ||
+        (!props.horizontal && props.showsVerticalScrollIndicator),
+      pullDownRefresh: props.refreshControl,
+      movable: TRUE,
+      bounces: props.bounces, // 看上去并不好使
+      zoom: props.bouncesZoom,
+      pullUpLoad: TRUE,
+      click: TRUE
     };
+  };
 
-    const ScrollViewClass = ScrollViewBase;
-
-    invariant(ScrollViewClass !== undefined, 'ScrollViewClass must not be undefined');
-
-    if (refreshControl) {
-      return React.cloneElement(
-        refreshControl,
-        { style: props.style },
-        <ScrollViewClass {...props} ref={this._setScrollNodeRef} style={baseStyle}>
-          {contentContainer}
-        </ScrollViewClass>
-      );
-    }
-
-    return (
-      <ScrollViewClass {...props} ref={this._setScrollNodeRef}>
-        {contentContainer}
-      </ScrollViewClass>
-    );
-  },
-
-  _handleContentOnLayout(e: Object) {
-    const { width, height } = e.nativeEvent.layout;
-    this.props.onContentSizeChange(width, height);
-  },
-
-  _handleScroll(e: Object) {
-    if (process.env.NODE_ENV !== 'production') {
-      if (this.props.onScroll && this.props.scrollEventThrottle == null) {
-        console.log(
-          'You specified `onScroll` on a <ScrollView> but not ' +
-            '`scrollEventThrottle`. You will only receive one event. ' +
-            'Using `16` you get all the events but be aware that it may ' +
-            "cause frame drops, use a bigger number if you don't need as " +
-            'much precision.'
-        );
+  refreshContentSize = timeout => {
+    try {
+      setTimeout(() => {
+        const contentDom = ReactDOM.findDOMNode(this.contentWrapRef);
+        const { offsetWidth, offsetHeight } = contentDom || {};
+        // 重置加载更多可用
+        if (!this.canLoadMore && offsetHeight !== this.contentSize.height) {
+          this.canLoadMore = true;
+        }
+        this.contentSize = {
+          height: offsetHeight,
+          width: offsetWidth
+        };
+      }, timeout || 0);
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('获取滚动内容尺寸失败', error);
       }
     }
+  };
 
-    if (this.props.keyboardDismissMode === 'on-drag') {
-      dismissKeyboard();
+  normalizeScrollEvent = (position = {}) => {
+    const _position = {};
+    /*******
+     * 由于better-scroll组件提供的事件监听的回调入参在在Start类方法中没有传入滚动的位置信息
+     * ! 这里会在任何滚动相关回调发生时触发，关注性能，理论上统一放到End的hook中也是可以的
+     * 1. 如果position入参传入空对象或undefined，命中②，④逻辑，读取组件缓存到属性中的位置数据
+     * 2. 如果传入数值走①、③逻辑，写入返回值并更新缓存数据
+     * 3. ⑤是安全代码，正常流程不会走到
+     *  */
+
+    if (typeof position.x === 'number') {
+      //! ①
+      _position.x = position.x;
+      this._cachePosition.x = position.x;
+    } else {
+      //! ②
+      _position.x = this._cachePosition.x;
     }
+    if (typeof position.y === 'number') {
+      //! ③
+      _position.y = position.y;
+      this._cachePosition.y = position.y;
+    } else {
+      //! ④
+      _position.y = this._cachePosition.y;
+    }
+    return {
+      nativeEvent: {
+        ...NativeEvent,
+        contentOffset: {
+          x: -_position.x || 0, //! ⑤
+          y: -_position.y || 0
+        },
+        contentSize: this.contentSize
+      },
+      timestamp: Date.now()
+    };
+  };
 
-    this.scrollResponderHandleScroll(e);
-  },
+  /**
+   * 统一处理组件属性的来源
+   * @param {*} newProps 可以是任意来源的props类型属性对象
+   */
+  handlePropsChangeToBSAttr = newProps => {
+    this.transPropsToBSAttr(newProps);
+  };
 
-  _setInnerViewRef(component) {
-    this._innerViewRef = component;
-  },
+  /**
+   * ref function handle
+   * Example: scrollTo({x: 0, y: 0, animated: true})
+   */
+  scrollTo = options => {
+    const { horizontal } = this.props;
+    const _options = {
+      x: 0,
+      y: 0,
+      animated: true
+    };
+    if (typeof options === 'number') {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          '不赞成使用数字参数处理，建议使用对象参数',
+          'https://reactnative.dev/docs/0.61/scrollview#scrollto'
+        );
+      }
+      _options[horizontal ? 'x' : 'y'] = -options;
+    } else if (typeof options === 'object') {
+      _options.x = options.x && horizontal ? -options.x : 0;
+      _options.y = options.y && !horizontal ? -options.y : 0;
+      _options.time = options.animated === false ? 0 : DEFAULT_ANIMATED_TIME;
+    } else {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('参数不合法');
+      }
+      return;
+    }
+    this.bs && this.bs.scrollTo(_options.x, _options.y, _options.time);
+  };
 
-  _setScrollNodeRef(component) {
-    this._scrollNodeRef = component;
+  componentDidMount() {
+    setTimeout(() => {
+      this.bs = new BetterScroll(ReactDOM.findDOMNode(this.wrapper), {
+        ...this.bsOptions
+      });
+
+      this.refreshContentSize(100);
+
+      const {
+        refreshControl,
+        onScroll,
+        scrollEnabled = TRUE,
+        onEndReached,
+        onScrollBeginDrag,
+        onMomentumScrollBegin,
+        onScrollEndDrag,
+        onMomentumScrollEnd
+      } = this.props;
+
+      this.bs.enabled = scrollEnabled;
+
+      /**
+       * hooks
+       */
+      const hooks = this.bs.scroller.hooks;
+      hooks.on('scrollEnd', position => {
+        onMomentumScrollEnd && onMomentumScrollEnd(this.normalizeScrollEvent(position));
+      });
+      const hooksActions = this.bs.scroller.actions.hooks;
+      hooksActions.on('end', (e, position) => {
+        onScrollEndDrag && onScrollEndDrag(this.normalizeScrollEvent(position));
+      });
+
+      /**
+       * callback
+       */
+      // this.bs.on("pullingDown", () => {
+      //     this.canLoadMore = true;
+      //     refreshControl.props?.onRefresh();
+      // });
+      this.bs.on('scrollStart', () => {
+        onScrollBeginDrag && onScrollBeginDrag(this.normalizeScrollEvent({}));
+        onMomentumScrollBegin && onMomentumScrollBegin(this.normalizeScrollEvent({}));
+      });
+
+      this.bs.on('scroll', position => {
+        const callbackValue = this.normalizeScrollEvent(position);
+        const { contentOffset = {}, contentSize = {} } = callbackValue.nativeEvent;
+        if (
+          this.canLoadMore &&
+          contentOffset.y + window.innerHeight >=
+            contentSize.height * (1 - this.onEndReachedThreshold)
+        ) {
+          this.canLoadMore = false;
+          onEndReached && onEndReached();
+        }
+        onScroll && onScroll(callbackValue);
+      });
+      // this.bs.on("pullingUp", () => {
+      //     onEndReached && onEndReached();
+      //     this.bs.finishPullUp();
+      // });
+    }, 0);
   }
-}): any): React.ComponentType<ScrollViewProps>);
 
-const commonStyle = {
-  flexGrow: 1,
-  flexShrink: 1,
-  // Enable hardware compositing in modern browsers.
-  // Creates a new layer with its own backing surface that can significantly
-  // improve scroll performance.
-  transform: [{ translateZ: 0 }],
-  // iOS native scrolling
-  WebkitOverflowScrolling: 'touch'
-};
+  componentWillUnmount() {
+    this.bs && this.bs.destroy();
+  }
 
+  componentWillReceiveProps(nextProps) {
+    const { refreshing: nextRefreshing } = nextProps?.props || {};
+    const { refreshing: thisRefreshing } = this.props?.props || {};
+    const { refreshing: refreshControlNextRefreshing } = nextProps?.refreshControl?.props || {};
+    const { refreshing: refreshControlThisRefreshing } = this.props.refreshControl?.props || {};
+    // 根据RefreshControl的refreshing属性值变化判断下拉刷新停止时机
+    if (
+      (thisRefreshing && nextRefreshing !== thisRefreshing) ||
+      (refreshControlThisRefreshing &&
+        refreshControlNextRefreshing !== refreshControlThisRefreshing)
+    ) {
+      this.bs && this.bs.finishPullDown();
+    }
+    if (
+      (!thisRefreshing && nextRefreshing !== thisRefreshing) ||
+      (!refreshControlThisRefreshing &&
+        refreshControlNextRefreshing !== refreshControlThisRefreshing)
+    ) {
+      this.bs && this.bs.autoPullDownRefresh();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      children,
+      scrollEnabled = TRUE
+      // bouncesZoom = FALSE,
+    } = this.props;
+
+    // 这里注意性能消耗 fix me
+    if (prevProps.children !== children) {
+      this.refreshContentSize();
+      this.bs && this.bs.refresh();
+    }
+    // better-scroll zoom属性暂时不支持动态使能
+    // if(prevProps.bouncesZoom !== bouncesZoom){
+    //     this.bsOptions = this.handlePropsChangeToBSAttr(this.props)
+    //     this.bs.refresh()
+    // }
+    if (prevProps.scrollEnabled !== scrollEnabled) {
+      if (this.bs) {
+        this.bs.enabled = scrollEnabled;
+      }
+    }
+  }
+
+  render() {
+    const { children, refreshControl, horizontal } = this.props;
+    return (
+      <View style={[styles.container, this.props.style]} ref={o => (this.wrapper = o)}>
+        {horizontal ? (
+          <View style={{ display: 'inline-block', height: '100%' }}>{children}</View>
+        ) : (
+          <View
+            style={{
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+              width: '100%'
+            }}
+          >
+            <View style={styles.refreshTip}>{refreshControl}</View>
+            <View
+              style={{
+                display: 'inline-block',
+                whiteSpace: 'nowrap',
+                width: '100%'
+              }}
+              ref={o => (this.contentWrapRef = o)}
+            >
+              {children}
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  }
+}
 const styles = StyleSheet.create({
-  baseVertical: {
-    ...commonStyle,
-    flexDirection: 'column',
-    overflowX: 'hidden',
-    overflowY: 'auto'
+  container: {
+    flex: 1,
+    display: 'inline-block',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap'
   },
-  baseHorizontal: {
-    ...commonStyle,
-    flexDirection: 'row',
-    overflowX: 'auto',
-    overflowY: 'hidden'
-  },
-  contentContainerHorizontal: {
-    flexDirection: 'row'
-  },
-  stickyHeader: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 10
-  },
-  pagingEnabledHorizontal: {
-    scrollSnapType: 'x mandatory'
-  },
-  pagingEnabledVertical: {
-    scrollSnapType: 'y mandatory'
-  },
-  pagingEnabledChild: {
-    scrollSnapAlign: 'start'
+  refreshTip: {
+    bottom: '100%',
+    height: 30,
+    lineHeight: 30,
+    width: '100%',
+    textAlign: 'center',
+    position: 'absolute',
+    left: 0,
+    overflow: 'hidden'
   }
 });
-
-export default ScrollView;
