@@ -2180,68 +2180,68 @@
 
 "@better-scroll/core@^2.0.5", "@better-scroll/core@^2.0.6":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/core/download/@better-scroll/core-2.0.6.tgz#31df475113f68c15a273eb3ad0ef725b3f2d68e6"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/core/download/@better-scroll/core-2.0.6.tgz#31df475113f68c15a273eb3ad0ef725b3f2d68e6"
   integrity sha1-Md9HURP2jBWic+s60O9yWz8taOY=
   dependencies:
     "@better-scroll/shared-utils" "^2.0.6"
 
 "@better-scroll/mouse-wheel@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/mouse-wheel/download/@better-scroll/mouse-wheel-2.0.6.tgz#32c28829c3f335726e59eb472a15586ddd75336c"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/mouse-wheel/download/@better-scroll/mouse-wheel-2.0.6.tgz#32c28829c3f335726e59eb472a15586ddd75336c"
   integrity sha1-MsKIKcPzNXJuWetHKhVYbd11M2w=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/observe-dom@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/observe-dom/download/@better-scroll/observe-dom-2.0.6.tgz#137aac5e3ed8cd6a3807c70a04a6d949dcfcf02c"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/observe-dom/download/@better-scroll/observe-dom-2.0.6.tgz#137aac5e3ed8cd6a3807c70a04a6d949dcfcf02c"
   integrity sha1-E3qsXj7YzWo4B8cKBKbZSdz88Cw=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/pull-down@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/pull-down/download/@better-scroll/pull-down-2.0.6.tgz#d464cb88f3592eb1e54d909953ee4c56a7cdc5b6"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/pull-down/download/@better-scroll/pull-down-2.0.6.tgz#d464cb88f3592eb1e54d909953ee4c56a7cdc5b6"
   integrity sha1-1GTLiPNZLrHlTZCZU+5MVqfNxbY=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/pull-up@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/pull-up/download/@better-scroll/pull-up-2.0.6.tgz#5e5786d589a46714f83e8c4c0689401749dfd98f"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/pull-up/download/@better-scroll/pull-up-2.0.6.tgz#5e5786d589a46714f83e8c4c0689401749dfd98f"
   integrity sha1-XleG1YmkZxT4PoxMBolAF0nf2Y8=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/scroll-bar@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/scroll-bar/download/@better-scroll/scroll-bar-2.0.6.tgz#6d38174744a4658f31c9591d86a2bbcb0f5ab2bc"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/scroll-bar/download/@better-scroll/scroll-bar-2.0.6.tgz#6d38174744a4658f31c9591d86a2bbcb0f5ab2bc"
   integrity sha1-bTgXR0SkZY8xyVkdhqK7yw9asrw=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/shared-utils@^2.0.6":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/shared-utils/download/@better-scroll/shared-utils-2.0.6.tgz#e1051feda90bdf44845abf622034d9fc58e03f33"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/shared-utils/download/@better-scroll/shared-utils-2.0.6.tgz#e1051feda90bdf44845abf622034d9fc58e03f33"
   integrity sha1-4QUf7akL30SEWr9iIDTZ/FjgPzM=
 
 "@better-scroll/slide@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/slide/download/@better-scroll/slide-2.0.6.tgz#e19905a76ded04d17b5a53d0ba1b4f37c34e1389"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/slide/download/@better-scroll/slide-2.0.6.tgz#e19905a76ded04d17b5a53d0ba1b4f37c34e1389"
   integrity sha1-4ZkFp23tBNF7WlPQuhtPN8NOE4k=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/wheel@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/wheel/download/@better-scroll/wheel-2.0.6.tgz#3d03560fefc544b74dc474a851e5880ea07b74d2"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/wheel/download/@better-scroll/wheel-2.0.6.tgz#3d03560fefc544b74dc474a851e5880ea07b74d2"
   integrity sha1-PQNWD+/FRLdNxHSoUeWIDqB7dNI=
   dependencies:
     "@better-scroll/core" "^2.0.6"
 
 "@better-scroll/zoom@^2.0.5":
   version "2.0.6"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/@better-scroll/zoom/download/@better-scroll/zoom-2.0.6.tgz#2ee6e41aee99c1e7efd0b16b4aea7b46fc039737"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/@better-scroll/zoom/download/@better-scroll/zoom-2.0.6.tgz#2ee6e41aee99c1e7efd0b16b4aea7b46fc039737"
   integrity sha1-LubkGu6Zwefv0LFrSup7RvwDlzc=
   dependencies:
     "@better-scroll/core" "^2.0.6"
@@ -4889,7 +4889,7 @@ bcrypt-pbkdf@^1.0.0:
 
 better-scroll@2.0.5:
   version "2.0.5"
-  resolved "https://repo.corp.qunar.com/artifactory/api/npm/npm-qunar/better-scroll/download/better-scroll-2.0.5.tgz#f735e645a7f34dadc62e8209f56401fb5aae2dea"
+  resolved "https://repo.xxxx.com/artifactory/api/npm/npm-qunar/better-scroll/download/better-scroll-2.0.5.tgz#f735e645a7f34dadc62e8209f56401fb5aae2dea"
   integrity sha1-9zXmRafzTa3GLoIJ9WQB+1quLeo=
   dependencies:
     "@better-scroll/core" "^2.0.5"
