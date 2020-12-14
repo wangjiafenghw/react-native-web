@@ -95,8 +95,8 @@ export default class extends React.Component {
       nativeEvent: {
         ...NativeEvent,
         contentOffset: {
-          x: -_position.x || 0, //! ⑤
-          y: -_position.y || 0
+          x: -_position.x / window.__rate_U || 0, //! ⑤
+          y: -_position.y / window.__rate_U || 0
         },
         contentSize: this.contentSize
       },
@@ -141,7 +141,8 @@ export default class extends React.Component {
       }
       return;
     }
-    this.bs && this.bs.scrollTo(_options.x, _options.y, _options.time);
+    this.bs &&
+      this.bs.scrollTo(_options.x * window.__rate_U, _options.y * window.__rate_U, _options.time);
   };
 
   componentDidMount() {
