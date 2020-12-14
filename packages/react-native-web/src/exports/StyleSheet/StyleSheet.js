@@ -60,7 +60,7 @@ const StyleSheet = {
 
   // `hairlineWidth` is not implemented using screen density as browsers may
   // round sub-pixel values down to `0`, causing the line not to be rendered.
-  hairlineWidth: 1
+  hairlineWidth: 1 / window.__rate_U
 };
 
 export default StyleSheet;
