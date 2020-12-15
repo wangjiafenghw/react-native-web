@@ -16,11 +16,12 @@ const TRUE = true,
 export default class extends React.Component {
   constructor(props) {
     super(props);
-    this.bs = null;
-    this.bsOptions = this.transPropsToBSAttr(props);
-    this.contentSize = { height: 0, width: 0 };
+    this.bs = null; // 滚动容器ref
+    this.bottomFlag = null; // 滚动容器内容区域最底部标记元素，用于实现scrollToEnd
+    this.bsOptions = this.transPropsToBSAttr(props); // 滚动对象配置
+    this.contentSize = { height: 0, width: 0 }; // 内容尺寸
     this._cachePosition = { x: 0, y: 0 }; // 缓存滚动数据
-    this.canLoadMore = true;
+    this.canLoadMore = TRUE; // 是否开放加载更多，会不重写
     this.onEndReachedThreshold = props.onEndReachedThreshold || DEFAULT_ON_EndReachedThreshold;
   }
 
@@ -121,7 +122,7 @@ export default class extends React.Component {
     const _options = {
       x: 0,
       y: 0,
-      animated: true
+      animated: TRUE
     };
     if (typeof options === 'number') {
       if (process.env.NODE_ENV !== 'production') {
@@ -134,7 +135,7 @@ export default class extends React.Component {
     } else if (typeof options === 'object') {
       _options.x = options.x && horizontal ? -options.x : 0;
       _options.y = options.y && !horizontal ? -options.y : 0;
-      _options.time = options.animated === false ? 0 : DEFAULT_ANIMATED_TIME;
+      _options.time = options.animated === FALSE ? 0 : DEFAULT_ANIMATED_TIME;
     } else {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('参数不合法');
@@ -143,6 +144,17 @@ export default class extends React.Component {
     }
     this.bs &&
       this.bs.scrollTo(_options.x * window.__rate_U, _options.y * window.__rate_U, _options.time);
+  };
+
+  scrollToEnd = ({ animated = TRUE, duration = DEFAULT_ANIMATED_TIME } = {}) => {
+    let time = duration;
+    if (!animated) {
+      time = 0;
+    }
+    try {
+      const bottomFlagDom = ReactDOM.findDOMNode(this.bottomFlag);
+      this.bs && this.bs.scrollToElement(bottomFlagDom, time);
+    } catch (err) {}
   };
 
   componentDidMount() {
@@ -285,6 +297,16 @@ export default class extends React.Component {
             >
               {children}
             </View>
+            <View
+              style={{
+                height: 0,
+                width: 0,
+                backgroundColor: 'transparent',
+                opacity: 0,
+                zIndex: -1
+              }}
+              ref={o => (this.bottomFlag = o)}
+            />
           </View>
         )}
       </View>
