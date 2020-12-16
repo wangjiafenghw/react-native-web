@@ -40,7 +40,7 @@ describe('StyleSheet/compile', () => {
             { from: { left: 0 }, to: { left: 10 } }
           ],
           marginHorizontal: 10,
-          font: '14px System',
+          font: '0.28rem System',
           transform: [
             {
               translateX: 50,

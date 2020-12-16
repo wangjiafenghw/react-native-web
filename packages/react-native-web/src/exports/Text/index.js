@@ -178,7 +178,7 @@ const classes = css.create({
     boxSizing: 'border-box',
     color: 'black',
     display: 'inline',
-    font: '14px System',
+    font: '0.28rem System',
     margin: 0,
     padding: 0,
     whiteSpace: 'pre-wrap',

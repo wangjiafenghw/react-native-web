@@ -104,12 +104,12 @@ describe('StyleSheet/createReactDOMStyle', () => {
 
     test('"System"', () => {
       expect(createReactDOMStyle({ fontFamily: 'System' })).toMatchSnapshot();
-      expect(createReactDOMStyle({ font: '14px System' })).toMatchSnapshot();
+      expect(createReactDOMStyle({ font: '0.28rem System' })).toMatchSnapshot();
     });
 
     test('"Noto, System"', () => {
       expect(createReactDOMStyle({ fontFamily: 'Noto, System' })).toMatchSnapshot();
-      expect(createReactDOMStyle({ font: '14px Noto, System' })).toMatchSnapshot();
+      expect(createReactDOMStyle({ font: '0.28rem Noto, System' })).toMatchSnapshot();
     });
 
     test('"Noto, BlinkMacSystemFont"', () => {

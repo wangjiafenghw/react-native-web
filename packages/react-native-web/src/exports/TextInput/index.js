@@ -395,7 +395,7 @@ const classes = css.create({
     border: '0 solid black',
     borderRadius: 0,
     boxSizing: 'border-box',
-    font: '14px System',
+    font: '0.28rem System',
     margin: 0,
     padding: 0,
     resize: 'none'

@@ -62,16 +62,16 @@ export default class Dimensions {
   static _update() {
     dimensions.window = {
       fontScale: 1,
-      height: win.innerHeight,
+      height: win.innerHeight / window.__rate_U,
       scale: win.devicePixelRatio || 1,
-      width: win.innerWidth
+      width: win.innerWidth / window.__rate_U
     };
 
     dimensions.screen = {
       fontScale: 1,
-      height: win.screen.height,
+      height: win.screen.height / window.__rate_U,
       scale: win.devicePixelRatio || 1,
-      width: win.screen.width
+      width: win.screen.width / window.__rate_U
     };
 
     if (Array.isArray(listeners['change'])) {
